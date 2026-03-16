@@ -71,4 +71,4 @@ mlruns/
 mlartifacts/
 
 # Misc
-*.log
+*.logartifacts/metrics/*.csv
