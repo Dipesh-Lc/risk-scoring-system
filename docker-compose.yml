@@ -1,0 +1,53 @@
+version: "3.9"
+
+services:
+
+  # --- Risk Scoring API ---
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runtime
+    image: risk-scoring-system:latest
+    container_name: risk-scoring-api
+    ports:
+      - "8000:8000"
+    environment:
+      - APP_ENV=production
+      - LOG_LEVEL=INFO
+      - PYTHONPATH=/app
+    volumes:
+      # Mount local artifacts so the container can read trained models
+      - ./artifacts:/app/artifacts:ro
+      - ./configs:/app/configs:ro
+      # Writable log volume
+      - ./artifacts/logs:/app/artifacts/logs:rw
+    healthcheck:
+      test: ["CMD", "python", "-c",
+             "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+
+  # --- Optional: MLflow tracking server ---
+  mlflow:
+    image: ghcr.io/mlflow/mlflow:v2.8.1
+    container_name: mlflow-server
+    ports:
+      - "5000:5000"
+    volumes:
+      - mlflow_data:/mlflow
+    command: >
+      mlflow server
+        --host 0.0.0.0
+        --port 5000
+        --backend-store-uri sqlite:///mlflow/mlflow.db
+        --default-artifact-root /mlflow/artifacts
+    profiles:
+      - mlflow   # Only starts with: docker-compose --profile mlflow up
+    restart: unless-stopped
+
+volumes:
+  mlflow_data:

@@ -1,0 +1,74 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Environments
+.env
+.venv
+venv/
+ENV/
+env/
+
+# Jupyter
+.ipynb_checkpoints
+*.ipynb_checkpoints/
+
+# Data (keep structure, ignore large files)
+data/raw/*.csv
+data/raw/*.xls
+data/raw/*.xlsx
+data/processed/
+data/interim/
+data/samples/*.csv
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+!data/interim/.gitkeep
+!data/samples/.gitkeep
+
+# Artifacts (generated - reproduce by running the pipeline)
+artifacts/models/*.pkl
+artifacts/models/*.joblib
+artifacts/metrics/*.json
+artifacts/shap/*.csv
+artifacts/shap/*.png
+artifacts/scores/
+artifacts/logs/
+reports/figures/
+!artifacts/models/.gitkeep
+!artifacts/metrics/.gitkeep
+!artifacts/shap/.gitkeep
+!artifacts/logs/.gitkeep
+!artifacts/scores/.gitkeep
+
+# Catch-all for serialised models anywhere in the repo
+*.joblib
+*.pkl
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Coverage
+.coverage
+htmlcov/
+.pytest_cache/
+
+# MLflow
+mlruns/
+mlartifacts/
+
+# Misc
+*.log

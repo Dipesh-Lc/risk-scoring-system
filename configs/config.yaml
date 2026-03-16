@@ -1,0 +1,133 @@
+project:
+  name: risk-scoring-system
+  version: "1.0.0"
+
+data:
+  raw_path: data/raw/credit_default.csv
+  processed_path: data/processed/
+  interim_path: data/interim/
+  samples_path: data/samples/
+  target_column: default_payment_next_month
+  id_column: ID
+  test_size: 0.15
+  val_size: 0.15
+  random_state: 42
+
+features:
+  # Raw numeric features
+  numeric:
+    - LIMIT_BAL
+    - AGE
+    - BILL_AMT1
+    - BILL_AMT2
+    - BILL_AMT3
+    - BILL_AMT4
+    - BILL_AMT5
+    - BILL_AMT6
+    - PAY_AMT1
+    - PAY_AMT2
+    - PAY_AMT3
+    - PAY_AMT4
+    - PAY_AMT5
+    - PAY_AMT6
+
+  # Ordinal/categorical features
+  categorical:
+    - SEX
+    - EDUCATION
+    - MARRIAGE
+
+  # Payment status features (ordinal -1 to 9)
+  payment_status:
+    - PAY_0
+    - PAY_2
+    - PAY_3
+    - PAY_4
+    - PAY_5
+    - PAY_6
+
+  # Derived features (computed in feature_store.py)
+  derived:
+    - util_ratio_1          # BILL_AMT1 / LIMIT_BAL
+    - util_ratio_avg        # mean(BILL_AMT1..6) / LIMIT_BAL
+    - pay_ratio_1           # PAY_AMT1 / (BILL_AMT1 + 1)
+    - pay_ratio_avg         # mean PAY_AMT / mean BILL_AMT
+    - delinquency_count     # count of PAY_i > 0
+    - max_delinquency       # max of PAY_0..6
+    - bill_trend            # slope of BILL_AMT over 6 months
+    - pay_trend             # slope of PAY_AMT over 6 months
+
+model:
+  baseline:
+    name: logistic_regression
+    params:
+      C: 1.0
+      max_iter: 1000
+      class_weight: balanced
+      random_state: 42
+
+  final:
+    name: xgboost
+    params:
+      n_estimators: 300
+      max_depth: 5
+      learning_rate: 0.05
+      subsample: 0.8
+      colsample_bytree: 0.8
+      min_child_weight: 3
+      reg_alpha: 0.1
+      reg_lambda: 1.0
+      scale_pos_weight: 3.5   # handles class imbalance (~22% default rate)
+      use_label_encoder: false
+      eval_metric: auc
+      random_state: 42
+
+  calibration:
+    method: isotonic   # isotonic or sigmoid
+    cv: 5
+
+  optuna:
+    n_trials: 50
+    timeout: 300       # seconds
+    direction: maximize
+    metric: roc_auc
+
+scoring:
+  # Linear scaling: score = round(probability * 100), capped [0,100]
+  bands:
+    low:
+      max_score: 30
+      label: Low
+    medium:
+      min_score: 31
+      max_score: 60
+      label: Medium
+    high:
+      min_score: 61
+      label: High
+
+  top_n_drivers: 5
+
+artifacts:
+  models_dir: artifacts/models
+  metrics_dir: artifacts/metrics
+  shap_dir: artifacts/shap
+  logs_dir: artifacts/logs
+  scores_dir: artifacts/scores
+
+monitoring:
+  drift:
+    # KS test threshold for feature drift
+    ks_threshold: 0.1
+    # PSI threshold
+    psi_threshold: 0.2
+    reference_data: data/processed/X_train.parquet
+  data_quality:
+    max_missing_pct: 0.05
+    score_distribution_window: 1000
+
+api:
+  host: "0.0.0.0"
+  port: 8000
+  title: "Risk Scoring API"
+  version: "1.0.0"
