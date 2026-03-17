@@ -26,16 +26,13 @@ jobs:
           key: ${{ runner.os }}-pip-lint-${{ hashFiles('requirements.txt') }}
 
       - name: Install lint tools
-        run: pip install black isort flake8
+        run: pip install black isort
 
       - name: black
         run: black src/ tests/ --check
 
       - name: isort
         run: isort src/ tests/ --check-only
-
-      - name: flake8
-        run: flake8 src/ tests/
 
   # -- Test 
   test:

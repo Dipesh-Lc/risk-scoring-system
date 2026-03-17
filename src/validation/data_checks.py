@@ -9,6 +9,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from typing import List
+
 import pandas as pd
 
 from src.utils.logger import get_logger
