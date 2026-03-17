@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+
 class TestPredictSingle:
     def test_predict_single_returns_required_keys(
         self, calibrated_xgb, scaler_and_scaled, split_data, sample_record

@@ -17,7 +17,7 @@ from src.utils.paths import ARTIFACTS_SHAP, ensure_dirs
 logger = get_logger(__name__)
 
 try:
-    import shap 
+    import shap
 
     _SHAP_AVAILABLE = True
 except ImportError:

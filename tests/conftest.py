@@ -8,7 +8,6 @@ import numpy as np
 import pandas as pd
 import pytest
 
-
 # Minimal synthetic dataset
 
 N_ROWS = 200
